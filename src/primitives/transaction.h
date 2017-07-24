@@ -125,6 +125,7 @@ public:
     std::string ToString() const;
 };
 
+typedef std::string CBlob;
 /** An output of a transaction.  It contains the public key that the next input
  * must be able to sign with to claim it.
  */
@@ -133,6 +134,7 @@ class CTxOut
 public:
     CAmount nValue;
     CScript scriptPubKey;
+    CBlob blob;
 
     CTxOut()
     {
@@ -140,6 +142,7 @@ public:
     }
 
     CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn);
+    CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, const CBlob& blobIn);
 
     ADD_SERIALIZE_METHODS;
 
@@ -147,6 +150,7 @@ public:
     inline void SerializationOp(Stream& s, Operation ser_action, int nType, int nVersion) {
         READWRITE(nValue);
         READWRITE(*(CScriptBase*)(&scriptPubKey));
+        READWRITE(LIMITED_STRING(blob, 65534));
     }
 
     void SetNull()

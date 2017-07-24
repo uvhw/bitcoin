@@ -76,9 +76,9 @@ for arg in sys.argv[1:]:
 
 #Set env vars
 if "LITECOIND" not in os.environ:
-    os.environ["LITECOIND"] = BUILDDIR + '/src/litecoind' + EXEEXT
+    os.environ["LITECOIND"] = BUILDDIR + '/src/graviocoind' + EXEEXT
 if "LITECOINCLI" not in os.environ:
-    os.environ["LITECOINCLI"] = BUILDDIR + '/src/litecoin-cli' + EXEEXT
+    os.environ["LITECOINCLI"] = BUILDDIR + '/src/graviocoin-cli' + EXEEXT
 
 if EXEEXT == ".exe" and "-win" not in opts:
     # https://github.com/bitcoin/bitcoin/commit/d52802551752140cf41f0d9a225a43e84404d3e9

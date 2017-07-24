@@ -77,10 +77,10 @@ enum WalletFeature
 {
     FEATURE_BASE = 10500, // the earliest version new wallets supports (only useful for getinfo's clientversion output)
 
-    FEATURE_WALLETCRYPT = 40000, // wallet encryption
-    FEATURE_COMPRPUBKEY = 60000, // compressed public keys
+    FEATURE_WALLETCRYPT = 10500, // wallet encryption
+    FEATURE_COMPRPUBKEY = 10500, // compressed public keys
 
-    FEATURE_HD = 130000, // Hierarchical key derivation after BIP32 (HD Wallet)
+    FEATURE_HD = 10500, // Hierarchical key derivation after BIP32 (HD Wallet)
     FEATURE_LATEST = FEATURE_COMPRPUBKEY // HD is optional, use FEATURE_COMPRPUBKEY as latest version
 };
 
@@ -127,6 +127,7 @@ struct CRecipient
     CScript scriptPubKey;
     CAmount nAmount;
     bool fSubtractFeeFromAmount;
+    CBlob blob;
 };
 
 typedef std::map<std::string, std::string> mapValue_t;
@@ -155,6 +156,7 @@ struct COutputEntry
     CTxDestination destination;
     CAmount amount;
     int vout;
+    CBlob blob;
 };
 
 /** A transaction with a merkle branch linking it to the block chain. */

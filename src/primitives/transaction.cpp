@@ -49,6 +49,13 @@ CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn)
     scriptPubKey = scriptPubKeyIn;
 }
 
+CTxOut::CTxOut(const CAmount& nValueIn, CScript scriptPubKeyIn, const CBlob& blobIn)
+{
+    nValue = nValueIn;
+    scriptPubKey = scriptPubKeyIn;
+    blob = blobIn;
+}
+
 uint256 CTxOut::GetHash() const
 {
     return SerializeHash(*this);
@@ -56,7 +63,7 @@ uint256 CTxOut::GetHash() const
 
 std::string CTxOut::ToString() const
 {
-    return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s)", nValue / COIN, nValue % COIN, HexStr(scriptPubKey).substr(0, 30));
+    return strprintf("CTxOut(nValue=%d.%08d, scriptPubKey=%s, blob=%u)", nValue / COIN, nValue % COIN, HexStr(scriptPubKey).substr(0, 30), blob.size());
 }
 
 CMutableTransaction::CMutableTransaction() : nVersion(CTransaction::CURRENT_VERSION), nLockTime(0) {}

@@ -730,8 +730,8 @@ UniValue gettxout(const UniValue& params, bool fHelp)
             "     \"hex\" : \"hex\",        (string) \n"
             "     \"reqSigs\" : n,          (numeric) Number of required signatures\n"
             "     \"type\" : \"pubkeyhash\", (string) The type, eg pubkeyhash\n"
-            "     \"addresses\" : [          (array of string) array of litecoin addresses\n"
-            "        \"litecoinaddress\"     (string) litecoin address\n"
+            "     \"addresses\" : [          (array of string) array of graviocoin addresses\n"
+            "        \"graviocoinaddress\"     (string) graviocoin address\n"
             "        ,...\n"
             "     ]\n"
             "  },\n"
@@ -786,6 +786,12 @@ UniValue gettxout(const UniValue& params, bool fHelp)
     ret.push_back(Pair("scriptPubKey", o));
     ret.push_back(Pair("version", coins.nVersion));
     ret.push_back(Pair("coinbase", coins.fCoinBase));
+
+    UniValue blob;
+    if (blob.read(coins.vout[n].blob))
+        ret.push_back(Pair("blob", blob));
+    else
+        ret.push_back(Pair("blob", coins.vout[n].blob));
 
     return ret;
 }
