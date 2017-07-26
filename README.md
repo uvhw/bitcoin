@@ -1,21 +1,23 @@
 Graviocoin Core integration/staging tree
 =====================================
 
-[![Build Status](https://travis-ci.org/graviocoin-project/graviocoin.svg?branch=master)](https://travis-ci.org/graviocoin-project/graviocoin)
+[![Build Status](https://travis-ci.org/graviocoin/graviocoin.svg?branch=gio.0.1.6)](https://travis-ci.org/graviocoin/graviocoin)
 
-https://graviocoin.org
+http://gravio.net
 
 What is Graviocoin?
 ----------------
 
 Graviocoin is an experimental digital currency that enables instant payments to
-anyone, anywhere in the world. Graviocoin uses peer-to-peer technology to operate
-with no central authority: managing transactions and issuing money are carried
-out collectively by the network. Graviocoin Core is the name of open source
-software which enables the use of this currency.
+anyone, anywhere in the world. Also Graviocoin is the base payment system for the 
+GRAVIO Ecosystem.
+
+Graviocoin uses peer-to-peer technology to operate with no central authority: 
+managing transactions and issuing money are carried out collectively by the network. 
+Graviocoin Core is the name of open source software which enables the use of this currency.
 
 For more information, as well as an immediately useable, binary version of
-the Graviocoin Core software, see [https://graviocoin.org](https://graviocoin.org).
+the Graviocoin Core software, see [http://gravio.net](http://gravio.net).
 
 License
 -------
@@ -27,8 +29,10 @@ Development Process
 -------------------
 
 The `master` branch is regularly built and tested, but is not guaranteed to be
-completely stable. [Tags](https://github.com/graviocoin-project/graviocoin/tags) are created
+completely stable. [Tags](https://github.com/gravio-net/graviocoin/tags) are created
 regularly to indicate new official, stable release versions of Graviocoin Core.
+
+The 'gio.0.1.6' branch is last verified and tested bundle.
 
 The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md).
 
