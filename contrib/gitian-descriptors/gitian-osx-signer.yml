@@ -7,7 +7,7 @@ architectures:
 packages:
 - "faketime"
 remotes:
-- "url": "https://github.com/graviocoin-project/graviocoin-detached-sigs.git"
+- "url": "https://github.com/gravio-net/graviocoin-detached-sigs.git"
   "dir": "signature"
 files:
 - "graviocoin-osx-unsigned.tar.gz"
