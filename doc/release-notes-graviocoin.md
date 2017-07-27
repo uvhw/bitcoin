@@ -1,13 +1,15 @@
 Graviocoin Core version 0.1.6 is now available from:
 
-  <https://download.graviocoin.org/graviocoin-0.13.3/>
+  <http://gravio.net/downloads/>
 
-This is a new minor version release, including new features, various bugfixes and performance improvements.
-It is recommended to upgrade to this version.
+This is a base release of Graviocoin. Main changes:
+- Optional “link” added to the resource in the GRAVIO Ecosystem into the body of transaction (each txout now has a blob, where link is stored).
+- "Send money" dialog changed to support blob info
+- "Transactio details" dialog changed to support blob info
 
 Please report bugs using the issue tracker at github:
 
-  <https://github.com/graviocoin-project/graviocoin/issues>
+  <https://github.com/gravio-net/graviocoin/issues>
 
 Compatibility
 ==============
@@ -72,6 +74,7 @@ Credits
 Thanks to everyone who directly contributed to this release:
 
 - [The Bitcoin Core Developers](/doc/release-notes)
+- [The Litecoin Core Developers](/doc/release-notes)
 - Adrian Gallagher
 - Shaolin Fry
 - Xinxi Wang
