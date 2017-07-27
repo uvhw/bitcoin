@@ -1,5 +1,5 @@
 ---
-name: "graviocoin-osx-0.13"
+name: "graviocoin-osx-0.1.6"
 enable_cache: true
 suites:
 - "trusty"
