@@ -1,4 +1,4 @@
-TOR SUPPORT IN LITECOIN
+TOR SUPPORT IN GRAVIOCOIN
 ======================
 
 It is possible to run Graviocoin as a Tor hidden service, and connect to such services.
@@ -42,11 +42,11 @@ reachable from the Tor network. Add these lines to your /etc/tor/torrc (or equiv
 config file):
 
 	HiddenServiceDir /var/lib/tor/graviocoin-service/
-	HiddenServicePort 9333 127.0.0.1:9333
-	HiddenServicePort 19335 127.0.0.1:19335
+	HiddenServicePort 9333 127.0.0.1:23333
+	HiddenServicePort 19335 127.0.0.1:43335
 
 The directory can be different of course, but (both) port numbers should be equal to
-your graviocoind's P2P listen port (9333 by default).
+your graviocoind's P2P listen port (23333 by default).
 
 	-externalip=X   You can tell graviocoin about its publicly reachable address using
 	                this option, and this can be a .onion address. Given the above

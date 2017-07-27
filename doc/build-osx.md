@@ -29,7 +29,7 @@ Build Graviocoin Core
 
 1. Clone the graviocoin source code and cd into `graviocoin`
 
-        git clone https://github.com/graviocoin-project/graviocoin
+        git clone https://github.com/gravio-net/graviocoin
         cd graviocoin
 
 2.  Build graviocoin-core:
