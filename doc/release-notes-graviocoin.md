@@ -3,9 +3,9 @@ Graviocoin Core version 0.1.6 is now available from:
   <http://gravio.net/downloads/>
 
 This is a base release of Graviocoin. Main changes:
-(1) Optional “link” added to the resource in the GRAVIO Ecosystem into the body of transaction (each txout now has a blob, where link is stored).
-(2) "Send money" dialog changed to support blob info
-(3) "Transactio details" dialog changed to support blob info
+- Optional “link” added to the resource in the GRAVIO Ecosystem into the body of transaction (each txout now has a blob, where link is stored).
+- "Send money" dialog changed to support blob info
+- "Transactio details" dialog changed to support blob info
 
 Please report bugs using the issue tracker at github:
 
