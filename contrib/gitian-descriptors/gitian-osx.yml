@@ -27,6 +27,7 @@ packages:
 - "python-dev"
 - "python-setuptools"
 - "fonts-tuffy"
+- "libc6-dev"
 remotes:
 - "url": "https://github.com/gravio-net/graviocoin.git"
   "dir": "graviocoin"
@@ -90,6 +91,7 @@ script: |
   tar -C ${BASEPREFIX}/SDKs -xf ${BUILD_DIR}/MacOSX10.11.sdk.tar.gz
 
   # Build dependencies for each host
+  whereis unistd.h
   for i in $HOSTS; do
     make ${MAKEOPTS} -C ${BASEPREFIX} HOST="${i}"
   done
