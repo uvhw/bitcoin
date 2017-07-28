@@ -10,8 +10,8 @@ build_darwin_SHA256SUM = shasum -a 256
 build_darwin_DOWNLOAD = curl --location --fail --connect-timeout $(DOWNLOAD_CONNECT_TIMEOUT) --retry $(DOWNLOAD_RETRIES) -o
 
 #darwin host on darwin builder. overrides darwin host preferences.
-darwin_CC=$(shell xcrun -f clang) -mmacosx-version-min=$(OSX_MIN_VERSION) -I/home/ubuntu/build/graviocoin/depends/SDKs/MacOSX-SDKs-MacOSX10.11.sdk/MacOSX10.11.sdk/usr/include -L/home/ubuntu/build/graviocoin/depends/SDKs/MacOSX-SDKs-MacOSX10.11.sdk/MacOSX10.11.sdk/usr/lib
-darwin_CXX:=$(shell xcrun -f clang++) -mmacosx-version-min=$(OSX_MIN_VERSION) -I/home/ubuntu/build/graviocoin/depends/SDKs/MacOSX-SDKs-MacOSX10.11.sdk/MacOSX10.11.sdk/usr/include -stdlib=libc++ -L/home/ubuntu/build/graviocoin/depends/SDKs/MacOSX-SDKs-MacOSX10.11.sdk/MacOSX10.11.sdk/usr/lib
+darwin_CC=$(shell xcrun -f clang) -mmacosx-version-min=$(OSX_MIN_VERSION)
+darwin_CXX:=$(shell xcrun -f clang++) -mmacosx-version-min=$(OSX_MIN_VERSION)
 darwin_AR:=$(shell xcrun -f ar)
 darwin_RANLIB:=$(shell xcrun -f ranlib)
 darwin_STRIP:=$(shell xcrun -f strip)
