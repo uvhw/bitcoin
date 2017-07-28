@@ -1,6 +1,6 @@
 OSX_MIN_VERSION=10.6
 OSX_SDK_VERSION=10.11
-OSX_SDK=$(SDK_PATH)/MacOSX-SDKs-MacOSX$(OSX_SDK_VERSION).sdk
+OSX_SDK=$(SDK_PATH)/MacOSX-SDKs-MacOSX$(OSX_SDK_VERSION).sdk/MacOSX$(OSX_SDK_VERSION).sdk
 LD64_VERSION=253.9
 darwin_CC=clang -target $(host) -mmacosx-version-min=$(OSX_MIN_VERSION) --sysroot $(OSX_SDK) -I/home/ubuntu/build/graviocoin/depends/SDKs/MacOSX-SDKs-MacOSX10.11.sdk/MacOSX10.11.sdk/usr/include -mlinker-version=$(LD64_VERSION) -L/home/ubuntu/build/graviocoin/depends/SDKs/MacOSX-SDKs-MacOSX10.11.sdk/MacOSX10.11.sdk/usr/lib
 darwin_CXX=clang++ -target $(host) -mmacosx-version-min=$(OSX_MIN_VERSION) --sysroot $(OSX_SDK) -I/home/ubuntu/build/graviocoin/depends/SDKs/MacOSX-SDKs-MacOSX10.11.sdk/MacOSX10.11.sdk/usr/include  -mlinker-version=$(LD64_VERSION) -stdlib=libc++ -L/home/ubuntu/build/graviocoin/depends/SDKs/MacOSX-SDKs-MacOSX10.11.sdk/MacOSX10.11.sdk/usr/lib
