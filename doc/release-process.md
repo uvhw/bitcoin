@@ -114,16 +114,16 @@ The gbuild invocations below <b>DO NOT DO THIS</b> by default.
 
     pushd ./gitian-builder
     ./bin/gbuild --memory 3000 --commit graviocoin=${VERSION} ../graviocoin/contrib/gitian-descriptors/gitian-linux.yml
-    ./bin/gsign --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs.ltc/ ../graviocoin/contrib/gitian-descriptors/gitian-linux.yml
+    ./bin/gsign --signer $SIGNER --release ${VERSION}-linux --destination ../gitian.sigs.gio/ ../graviocoin/contrib/gitian-descriptors/gitian-linux.yml
     mv build/out/graviocoin-*.tar.gz build/out/src/graviocoin-*.tar.gz ../
 
     ./bin/gbuild --memory 3000 --commit graviocoin=${VERSION} ../graviocoin/contrib/gitian-descriptors/gitian-win.yml
-    ./bin/gsign --signer $SIGNER --release ${VERSION}-win-unsigned --destination ../gitian.sigs.ltc/ ../graviocoin/contrib/gitian-descriptors/gitian-win.yml
+    ./bin/gsign --signer $SIGNER --release ${VERSION}-win-unsigned --destination ../gitian.sigs.gio/ ../graviocoin/contrib/gitian-descriptors/gitian-win.yml
     mv build/out/graviocoin-*-win-unsigned.tar.gz inputs/graviocoin-win-unsigned.tar.gz
     mv build/out/graviocoin-*.zip build/out/graviocoin-*.exe ../
 
     ./bin/gbuild --memory 3000 --commit graviocoin=${VERSION} ../graviocoin/contrib/gitian-descriptors/gitian-osx.yml
-    ./bin/gsign --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs.ltc/ ../graviocoin/contrib/gitian-descriptors/gitian-osx.yml
+    ./bin/gsign --signer $SIGNER --release ${VERSION}-osx-unsigned --destination ../gitian.sigs.gio/ ../graviocoin/contrib/gitian-descriptors/gitian-osx.yml
     mv build/out/graviocoin-*-osx-unsigned.tar.gz inputs/graviocoin-osx-unsigned.tar.gz
     mv build/out/graviocoin-*.tar.gz build/out/graviocoin-*.dmg ../
     popd
