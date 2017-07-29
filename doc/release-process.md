@@ -145,21 +145,21 @@ Add other gitian builders keys to your gpg keyring
 Verify the signatures
 
     pushd ./gitian-builder
-    ./bin/gverify -v -d ../gitian.sigs.ltc/ -r ${VERSION}-linux ../graviocoin/contrib/gitian-descriptors/gitian-linux.yml
-    ./bin/gverify -v -d ../gitian.sigs.ltc/ -r ${VERSION}-win-unsigned ../graviocoin/contrib/gitian-descriptors/gitian-win.yml
-    ./bin/gverify -v -d ../gitian.sigs.ltc/ -r ${VERSION}-osx-unsigned ../graviocoin/contrib/gitian-descriptors/gitian-osx.yml
+    ./bin/gverify -v -d ../gitian.sigs.gio/ -r ${VERSION}-linux ../graviocoin/contrib/gitian-descriptors/gitian-linux.yml
+    ./bin/gverify -v -d ../gitian.sigs.gio/ -r ${VERSION}-win-unsigned ../graviocoin/contrib/gitian-descriptors/gitian-win.yml
+    ./bin/gverify -v -d ../gitian.sigs.gio/ -r ${VERSION}-osx-unsigned ../graviocoin/contrib/gitian-descriptors/gitian-osx.yml
     popd
 
 ### Next steps:
 
 Commit your signature to gitian.sigs.ltc:
 
-    pushd gitian.sigs.ltc
+    pushd gitian.sigs.gio
     git add ${VERSION}-linux/${SIGNER}
     git add ${VERSION}-win-unsigned/${SIGNER}
     git add ${VERSION}-osx-unsigned/${SIGNER}
     git commit -a
-    git push  # Assuming you can push to the gitian.sigs.ltc tree
+    git push  # Assuming you can push to the gitian.sigs.gio tree
     popd
 
 Wait for Windows/OS X detached signatures:
@@ -172,7 +172,7 @@ Create (and optionally verify) the signed OS X binary:
     pushd ./gitian-builder
     ./bin/gbuild -i --commit signature=${VERSION} ../graviocoin/contrib/gitian-descriptors/gitian-osx-signer.yml
     ./bin/gsign --signer $SIGNER --release ${VERSION}-osx-signed --destination ../gitian.sigs.gio/ ../graviocoin/contrib/gitian-descriptors/gitian-osx-signer.yml
-    ./bin/gverify -v -d ../gitian.sigs.ltc/ -r ${VERSION}-osx-signed ../graviocoin/contrib/gitian-descriptors/gitian-osx-signer.yml
+    ./bin/gverify -v -d ../gitian.sigs.gio/ -r ${VERSION}-osx-signed ../graviocoin/contrib/gitian-descriptors/gitian-osx-signer.yml
     mv build/out/graviocoin-osx-signed.dmg ../graviocoin-${VERSION}-osx.dmg
     popd
 
@@ -181,7 +181,7 @@ Create (and optionally verify) the signed Windows binaries:
     pushd ./gitian-builder
     ./bin/gbuild -i --commit signature=${VERSION} ../graviocoin/contrib/gitian-descriptors/gitian-win-signer.yml
     ./bin/gsign --signer $SIGNER --release ${VERSION}-win-signed --destination ../gitian.sigs.gio/ ../graviocoin/contrib/gitian-descriptors/gitian-win-signer.yml
-    ./bin/gverify -v -d ../gitian.sigs.ltc/ -r ${VERSION}-win-signed ../graviocoin/contrib/gitian-descriptors/gitian-win-signer.yml
+    ./bin/gverify -v -d ../gitian.sigs.gio/ -r ${VERSION}-win-signed ../graviocoin/contrib/gitian-descriptors/gitian-win-signer.yml
     mv build/out/graviocoin-*win64-setup.exe ../graviocoin-${VERSION}-win64-setup.exe
     mv build/out/graviocoin-*win32-setup.exe ../graviocoin-${VERSION}-win32-setup.exe
     popd
