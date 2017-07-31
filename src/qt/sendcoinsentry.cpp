@@ -11,6 +11,7 @@
 #include "optionsmodel.h"
 #include "platformstyle.h"
 #include "walletmodel.h"
+#include "util.h"
 
 #include <QApplication>
 #include <QClipboard>
@@ -48,6 +49,7 @@ SendCoinsEntry::SendCoinsEntry(const PlatformStyle *platformStyle, QWidget *pare
     connect(ui->deleteButton, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_is, SIGNAL(clicked()), this, SLOT(deleteClicked()));
     connect(ui->deleteButton_s, SIGNAL(clicked()), this, SLOT(deleteClicked()));
+    ui->blob->setReadOnly(GetArg("-enableblob", "").empty());
 }
 
 SendCoinsEntry::~SendCoinsEntry()
