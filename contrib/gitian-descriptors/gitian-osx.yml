@@ -27,6 +27,7 @@ packages:
 - "python-dev"
 - "python-setuptools"
 - "fonts-tuffy"
+- "clang"
 remotes:
 - "url": "https://github.com/gravio-net/graviocoin.git"
   "dir": "graviocoin"
