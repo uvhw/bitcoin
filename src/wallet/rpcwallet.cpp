@@ -1396,6 +1396,13 @@ void ListTransactions(const CWalletTx& wtx, const string& strAccount, int nMinDe
                 entry.push_back(Pair("vout", r.vout));
                 if (fLong)
                     WalletTxToJSON(wtx, entry);
+
+                UniValue blob;
+                if (blob.read(r.blob))
+                    entry.push_back(Pair("blob", blob));
+                else
+                    entry.push_back(Pair("blob", r.blob));
+
                 ret.push_back(entry);
             }
         }
