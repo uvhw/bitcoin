@@ -1,4 +1,17 @@
-Graviocoin Core version 0.1.6 is now available from:
+Graviocoin Core version 0.1.7:
+==============================
+
+  <http://gravio.net/downloads/>
+
+Main changes:
+- Changed diffuculty retargeting algorithm. Diff retarget now works after each new block.
+
+Please report bugs using the issue tracker at github:
+
+  <https://github.com/gravio-net/graviocoin/issues>
+
+Graviocoin Core version 0.1.6:
+==============================
 
   <http://gravio.net/downloads/>
 
