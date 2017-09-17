@@ -125,6 +125,8 @@ public:
      * The test_case parameter tweaks the deterministic nonce.
      */
     bool Sign(const uint256& hash, std::vector<unsigned char>& vchSig, uint32_t test_case = 0) const;
+    
+    bool GetECDHSecret(const CPubKey& pubkey, std::vector<unsigned char>& result) const;
 
     /**
      * Create a compact signature (65 bytes), which allows reconstructing the used public key.
