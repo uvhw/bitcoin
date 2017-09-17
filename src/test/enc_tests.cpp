@@ -73,12 +73,14 @@ BOOST_AUTO_TEST_CASE(enc_test1)
 	std::string pubkey_a_str = HexStr(pubkey_a.begin(), pubkey_a.end());
 	std::string pubkey_b_str = HexStr(pubkey_b.begin(), pubkey_b.end());
 	printf("pubkeys\n%s\n%s\n", pubkey_a_str.c_str(), pubkey_b_str.c_str());
+
 	std::vector<unsigned char> result_a, result_b;
 	secret_a.GetECDHSecret(pubkey_b, result_a);
 	secret_b.GetECDHSecret(pubkey_a, result_b);
 	std::string result_a_str = HexStr(result_a.begin(), result_a.end());
 	std::string result_b_str = HexStr(result_b.begin(), result_b.end());
 	printf("ecdh secret\n%s\n%s\n", result_a_str.c_str(), result_b_str.c_str());
+
 	AES256Encrypt enc(&result_a[0]);
 	std::vector<unsigned char> plain = {'t','e','s','t',0}, cipher, result_plain;
 	plain.resize(16, 0);
@@ -87,7 +89,28 @@ BOOST_AUTO_TEST_CASE(enc_test1)
 	enc.Encrypt(&cipher[0], &plain[0]);
 	AES256Decrypt dec(&result_b[0]);
 	dec.Decrypt(&result_plain[0], &cipher[0]);
-	printf("encrypt\n%s\n%s\n%s\n", &plain[0], &cipher[0],&result_plain[0]);
+    std::string cipher_str = HexStr(cipher.begin(), cipher.end());
+	printf("encrypt\n%s\n%s\n%s\n", &plain[0], cipher_str.c_str() ,&result_plain[0]);
+
+    unsigned char chIV[16];
+    unsigned char chKey[32];
+    uint256 hash_a = pubkey_a.GetHash();
+    memcpy(chIV, &hash_a, 16);
+    memcpy(chKey, &result_a[0], 32);
+    AES256CBCEncrypt enc2(chKey, chIV, true);
+    std::string data_str = "Testing testings gaga tits make me happy";
+    std::vector<unsigned char> plain2(data_str.begin(), data_str.end()), cipher2, result_plain2;
+    cipher2.resize(plain2.size() + AES_BLOCKSIZE);
+    int len = enc2.Encrypt(&plain2[0], plain2.size(), &cipher2[0]);
+    cipher2.resize(len);
+    memcpy(chIV, &hash_a, 16);
+    memcpy(chKey, &result_b[0], 32);
+    AES256CBCDecrypt dec2(chKey, chIV, true);
+    result_plain2.resize(cipher2.size());
+    len = dec2.Decrypt(&cipher2[0], cipher2.size(), &result_plain2[0]);
+    std::string cipher_str2 = HexStr(cipher2.begin(), cipher2.end());
+    printf("encrypt 2\n%s\n%s\n%s\n", &plain2[0], cipher_str2.c_str(), &result_plain2[0]);
+
 /*
     CBitcoinSecret bsecret1, bsecret2, bsecret1C, bsecret2C, baddress1;
     BOOST_CHECK( bsecret1.SetString (strSecret1));
