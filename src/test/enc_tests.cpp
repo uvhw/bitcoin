@@ -92,20 +92,23 @@ BOOST_AUTO_TEST_CASE(enc_test1)
     std::string cipher_str = HexStr(cipher.begin(), cipher.end());
 	printf("encrypt\n%s\n%s\n%s\n", &plain[0], cipher_str.c_str() ,&result_plain[0]);
 
-    unsigned char chIV[16];
+    unsigned char chIV[16], chIV2[16];
     unsigned char chKey[32];
     uint256 hash_a = pubkey_a.GetHash();
     memcpy(chIV, &hash_a, 16);
+    memcpy(chIV2, &hash_a, 16);
     memcpy(chKey, &result_a[0], 32);
     AES256CBCEncrypt enc2(chKey, chIV, true);
-    std::string data_str = "Testing testings gaga tits make me happy";
-    std::vector<unsigned char> plain2(data_str.begin(), data_str.end()), cipher2, result_plain2;
+    unsigned char data_str[50] = "Testing testings gaga tits make me happy";
+    std::vector<unsigned char> plain2, cipher2, result_plain2;
+    plain2.resize(50 ,0);
+    memcpy(&plain2[0], data_str, strlen((const char*)data_str));
     cipher2.resize(plain2.size() + AES_BLOCKSIZE);
     int len = enc2.Encrypt(&plain2[0], plain2.size(), &cipher2[0]);
     cipher2.resize(len);
     memcpy(chIV, &hash_a, 16);
     memcpy(chKey, &result_b[0], 32);
-    AES256CBCDecrypt dec2(chKey, chIV, true);
+    AES256CBCDecrypt dec2(chKey, chIV2, true);
     result_plain2.resize(cipher2.size());
     len = dec2.Decrypt(&cipher2[0], cipher2.size(), &result_plain2[0]);
     std::string cipher_str2 = HexStr(cipher2.begin(), cipher2.end());
