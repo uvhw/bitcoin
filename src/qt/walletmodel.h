@@ -20,6 +20,7 @@ class OptionsModel;
 class PlatformStyle;
 class RecentRequestsTableModel;
 class TransactionTableModel;
+class MessageTableModel;
 class WalletModelTransaction;
 
 class CCoinControl;
@@ -37,9 +38,9 @@ QT_END_NAMESPACE
 class SendCoinsRecipient
 {
 public:
-    explicit SendCoinsRecipient() : amount(0), fSubtractFeeFromAmount(false), nVersion(SendCoinsRecipient::CURRENT_VERSION) { }
+    explicit SendCoinsRecipient() : amount(0), fSubtractFeeFromAmount(false), nVersion(SendCoinsRecipient::CURRENT_VERSION), calcAndAddFee(false) { }
     explicit SendCoinsRecipient(const QString &addr, const QString &label, const CAmount& amount, const QString &message):
-        address(addr), label(label), amount(amount), message(message), fSubtractFeeFromAmount(false), nVersion(SendCoinsRecipient::CURRENT_VERSION) {}
+        address(addr), label(label), amount(amount), message(message), fSubtractFeeFromAmount(false), nVersion(SendCoinsRecipient::CURRENT_VERSION), calcAndAddFee(false) {}
 
     // If from an unauthenticated payment request, this is used for storing
     // the addresses, e.g. address-A<br />address-B<br />address-C.
@@ -62,6 +63,7 @@ public:
 
     static const int CURRENT_VERSION = 1;
     int nVersion;
+    bool calcAndAddFee;
 
     ADD_SERIALIZE_METHODS;
 
@@ -132,6 +134,7 @@ public:
     OptionsModel *getOptionsModel();
     AddressTableModel *getAddressTableModel();
     TransactionTableModel *getTransactionTableModel();
+    MessageTableModel *getMessageTableModel();
     RecentRequestsTableModel *getRecentRequestsTableModel();
 
     CAmount getBalance(const CCoinControl *coinControl = NULL) const;
@@ -145,6 +148,9 @@ public:
 
     // Check address for validity
     bool validateAddress(const QString &address);
+
+    // get first own address
+    std::string getFirstOwnAddress();
 
     // Return status record for SendCoins, contains error id + information
     struct SendCoinsReturn
@@ -218,6 +224,7 @@ private:
 
     AddressTableModel *addressTableModel;
     TransactionTableModel *transactionTableModel;
+    MessageTableModel *messageTableModel;
     RecentRequestsTableModel *recentRequestsTableModel;
 
     // Cache some values to be able to detect changes

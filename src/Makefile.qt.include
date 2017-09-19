@@ -153,6 +153,10 @@ QT_MOC_CPP = \
   qt/moc_transactionfilterproxy.cpp \
   qt/moc_transactiontablemodel.cpp \
   qt/moc_transactionview.cpp \
+  qt/moc_messagefilterproxy.cpp \
+  qt/moc_messagetablemodel.cpp \
+  qt/moc_messageview.cpp \
+  qt/moc_messageedit.cpp \
   qt/moc_utilitydialog.cpp \
   qt/moc_walletframe.cpp \
   qt/moc_walletmodel.cpp \
@@ -224,6 +228,11 @@ BITCOIN_QT_H = \
   qt/transactionrecord.h \
   qt/transactiontablemodel.h \
   qt/transactionview.h \
+  qt/messagefilterproxy.h \
+  qt/messagerecord.h \
+  qt/messagetablemodel.h \
+  qt/messageview.h \
+  qt/messageedit.h \
   qt/utilitydialog.h \
   qt/walletframe.h \
   qt/walletmodel.h \
@@ -255,6 +264,7 @@ RES_ICONS = \
   qt/res/icons/edit.png \
   qt/res/icons/editcopy.png \
   qt/res/icons/editpaste.png \
+  qt/res/icons/editpastein.png \
   qt/res/icons/export.png \
   qt/res/icons/eye.png \
   qt/res/icons/eye_minus.png \
@@ -283,7 +293,22 @@ RES_ICONS = \
   qt/res/icons/tx_mined.png \
   qt/res/icons/warning.png \
   qt/res/icons/verify.png \
-  qt/res/icons/transaction_abandoned.png
+  qt/res/icons/transaction_abandoned.png \
+  qt/res/icons/editcut.png \
+  qt/res/icons/editredo.png \
+  qt/res/icons/editundo.png \
+  qt/res/icons/filenew.png \
+  qt/res/icons/fileopen.png \
+  qt/res/icons/textbold.png \
+  qt/res/icons/textcenter.png \
+  qt/res/icons/textitalic.png \
+  qt/res/icons/textjustify.png \
+  qt/res/icons/textleft.png \
+  qt/res/icons/textright.png \
+  qt/res/icons/textunder.png \
+  qt/res/icons/zoomin.png \
+  qt/res/icons/zoomout.png \
+  qt/res/icons/richtext.png
 
 BITCOIN_QT_BASE_CPP = \
   qt/bantablemodel.cpp \
@@ -333,6 +358,11 @@ BITCOIN_QT_WALLET_CPP = \
   qt/transactionrecord.cpp \
   qt/transactiontablemodel.cpp \
   qt/transactionview.cpp \
+  qt/messagefilterproxy.cpp \
+  qt/messagerecord.cpp \
+  qt/messagetablemodel.cpp \
+  qt/messageview.cpp \
+  qt/messageedit.cpp \
   qt/walletframe.cpp \
   qt/walletmodel.cpp \
   qt/walletmodeltransaction.cpp \

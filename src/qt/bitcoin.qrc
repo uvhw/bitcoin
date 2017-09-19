@@ -23,6 +23,7 @@
         <file alias="options">res/icons/configure.png</file>
         <file alias="receiving_addresses">res/icons/receive.png</file>
         <file alias="editpaste">res/icons/editpaste.png</file>
+        <file alias="editpastein">res/icons/editpastein.png</file>
         <file alias="editcopy">res/icons/editcopy.png</file>
         <file alias="add">res/icons/add.png</file>
         <file alias="edit">res/icons/edit.png</file>
@@ -50,6 +51,21 @@
         <file alias="fontsmaller">res/icons/fontsmaller.png</file>
         <file alias="prompticon">res/icons/chevron.png</file>
         <file alias="transaction_abandoned">res/icons/transaction_abandoned.png</file>
+        <file alias="editcut">res/icons/editcut.png</file>
+        <file alias="editredo">res/icons/editredo.png</file>
+        <file alias="editundo">res/icons/editundo.png</file>
+        <file alias="filenew">res/icons/filenew.png</file>
+        <file alias="fileopen">res/icons/fileopen.png</file>
+        <file alias="textbold">res/icons/textbold.png</file>
+        <file alias="textcenter">res/icons/textcenter.png</file>
+        <file alias="textitalic">res/icons/textitalic.png</file>
+        <file alias="textjustify">res/icons/textjustify.png</file>
+        <file alias="textleft">res/icons/textleft.png</file>
+        <file alias="textright">res/icons/textright.png</file>
+        <file alias="textunder">res/icons/textunder.png</file>
+        <file alias="zoomin">res/icons/zoomin.png</file>
+        <file alias="zoomout">res/icons/zoomout.png</file>
+        <file alias="richtext">res/icons/richtext.png</file>
     </qresource>
     <qresource prefix="/movies">
         <file alias="spinner-000">res/movies/spinner-000.png</file>

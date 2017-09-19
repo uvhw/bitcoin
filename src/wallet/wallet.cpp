@@ -2239,7 +2239,7 @@ bool CWallet::CreateTransaction(const vector<CRecipient>& vecSend, CWalletTx& wt
                         }
                     }
 
-                    if (txout.IsDust(::minRelayTxFee))
+                    if (txout.IsDust(::minRelayTxFee) && !recipient.calcAndAddFee)
                     {
                         if (recipient.fSubtractFeeFromAmount && nFeeRet > 0)
                         {

@@ -128,6 +128,7 @@ struct CRecipient
     CAmount nAmount;
     bool fSubtractFeeFromAmount;
     CBlob blob;
+    bool calcAndAddFee;
 };
 
 typedef std::map<std::string, std::string> mapValue_t;
