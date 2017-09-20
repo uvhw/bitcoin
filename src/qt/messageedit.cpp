@@ -654,11 +654,11 @@ bool MessageEdit::trySendMessage()
     QList<SendCoinsRecipient> lRecipients;
     SendCoinsRecipient lRecipient;
     lRecipient.address = QString(rec->to.c_str());
-
     lRecipient.calcAndAddFee = true;
-    lRecipient.amount = DEFAULT_MIN_RELAY_TX_FEE * 4;
 
     std::string lRawBlob = lBlob.write();
+    lRecipient.amount = ((lRawBlob.length() / 1024) + 2) * DEFAULT_MIN_RELAY_TX_FEE * 3;
+
     //qDebug() << "lRawBlob = " << lRawBlob.c_str();
 
     lRecipient.blob = QString(lRawBlob.c_str());
