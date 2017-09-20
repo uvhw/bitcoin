@@ -222,6 +222,7 @@ MessageView::MessageView(const PlatformStyle *platformStyle, QWidget *parent) :
     // Message view
     messageEdit = new QTextEdit(this);
     messageEdit->setReadOnly(true);
+    messageEdit->setFontPointSize(10);
     vMessageLayout->addWidget(messageEdit);
 
     // Labels

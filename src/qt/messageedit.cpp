@@ -76,6 +76,7 @@ MessageEdit::MessageEdit(const PlatformStyle *platformStyle, WalletModel *wallet
     setMinimumSize(QSize(640, 480));
 
     textEdit = new QTextEdit(this);
+    textEdit->setFontPointSize(10);
 
     connect(textEdit, &QTextEdit::currentCharFormatChanged, this, &MessageEdit::currentCharFormatChanged);
     connect(textEdit, &QTextEdit::cursorPositionChanged, this, &MessageEdit::cursorPositionChanged);
@@ -144,6 +145,7 @@ MessageEdit::MessageEdit(const PlatformStyle *platformStyle, WalletModel *wallet
 
     QFont textFont("Helvetica");
     textFont.setStyleHint(QFont::SansSerif);
+    textFont.setPointSize(10);
     textEdit->setFont(textFont);
     fontChanged(textEdit->font());
     colorChanged(textEdit->textColor());

@@ -441,21 +441,21 @@ bool MessageRecord::encrypt(CKey& own, CPubKey& own_pub, CPubKey& other, std::st
     memcpy(chIV, &hash_a, 16);
     memcpy(chKey, &lResult[0], 32);
 
-    //qDebug() << "encrypt: result = " << HexStr(lResult.begin(), lResult.end()).c_str();
-    //qDebug() << "encrypt: pubkey = " << HexStr(&chIV[0], ((unsigned char*)chIV)+16).c_str();
+    qDebug() << "encrypt: result = " << HexStr(lResult.begin(), lResult.end()).c_str();
+    qDebug() << "encrypt: pubkey = " << HexStr(&chIV[0], ((unsigned char*)chIV)+16).c_str();
 
     AES256CBCEncrypt lEnc(chKey, chIV, true);
 
     std::vector<unsigned char> lSrc; lSrc.resize(src.length()+1, 0);
     memcpy(&lSrc[0], src.c_str(), src.length());
-    cypher.resize(lSrc.size() + AES_BLOCKSIZE);
+    cypher.resize(lSrc.size() + AES_BLOCKSIZE, 0);
 
     unsigned int lLen = lEnc.Encrypt(&lSrc[0], lSrc.size(), &cypher[0]);
     cypher.resize(lLen);
 
-    //qDebug() << "encrypt: src = " << src.c_str();
-    //qDebug() << "encrypt: cypher = " << HexStr(cypher.begin(), cypher.end()).c_str();
-    //qDebug() << "encrypt: len = " << lLen << lSrc.size();
+    qDebug() << "encrypt: src = " << src.c_str();
+    qDebug() << "encrypt: cypher = " << HexStr(cypher.begin(), cypher.end()).c_str();
+    qDebug() << "encrypt: len = " << lLen << lSrc.size();
 
     return lLen >= lSrc.size();
 }
@@ -470,25 +470,30 @@ bool MessageRecord::decrypt(CKey& own, CPubKey&own_pub, CPubKey& other, std::vec
     unsigned char chIV[16];
     unsigned char chKey[32];
 
-    uint256 hash_a = other.GetHash();
+    uint256 hash_a;
+
+    if(model->isOwnAddress(from)) hash_a = own_pub.GetHash();
+    else hash_a = other.GetHash();
+
     memcpy(chIV, &hash_a, 16);
     memcpy(chKey, &lResult[0], 32);
 
-    //qDebug() << "decrypt: result = " << HexStr(lResult.begin(), lResult.end()).c_str();
-    //qDebug() << "decrypt: pubkey = " << HexStr(&chIV[0], ((unsigned char*)chIV)+16).c_str();
+    qDebug() << "decrypt: result = " << HexStr(lResult.begin(), lResult.end()).c_str();
+    qDebug() << "decrypt: pubkey = " << HexStr(&chIV[0], ((unsigned char*)chIV)+16).c_str();
 
     AES256CBCDecrypt lDec(chKey, chIV, true);
 
-    std::vector<unsigned char> lDst; lDst.resize(cypher.size(), 0);
+    std::vector<unsigned char> lDst; lDst.resize(cypher.size()+1, 0);
     int lLen = lDec.Decrypt(&cypher[0], cypher.size(), &lDst[0]);
+    lDst.resize(lLen);
 
-    //qDebug() << "decrypt: cypher = " << HexStr(cypher.begin(), cypher.end()).c_str();
-    //qDebug() << "decrypt: len = " << lLen;
+    qDebug() << "decrypt: cypher = " << HexStr(cypher.begin(), cypher.end()).c_str();
+    qDebug() << "decrypt: len = " << lLen;
 
     if (lLen >= 0)
     {
         dst.insert(0, (const char*)&lDst[0], lDst.size());
-        //qDebug() << "decrypt: dst = " << dst.c_str();
+        qDebug() << "decrypt: dst = " << dst.c_str();
 
         return true;
     }
