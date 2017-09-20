@@ -25,6 +25,7 @@ class WalletModelTransaction;
 
 class CCoinControl;
 class CKeyID;
+class CKey;
 class COutPoint;
 class COutput;
 class CPubKey;
@@ -146,11 +147,16 @@ public:
     CAmount getWatchImmatureBalance() const;
     EncryptionStatus getEncryptionStatus() const;
 
+    bool getKey(const CKeyID &address, CKey &keyOut);
+
     // Check address for validity
     bool validateAddress(const QString &address);
 
     // get first own address
     std::string getFirstOwnAddress();
+
+    // is own address
+    bool isOwnAddress(const std::string&);
 
     // Return status record for SendCoins, contains error id + information
     struct SendCoinsReturn

@@ -56,6 +56,7 @@
 #include <QToolBar>
 #include <QVBoxLayout>
 #include <QStyleFactory>
+#include <QDebug>
 
 #if QT_VERSION < 0x050000
 #include <QTextDocument>
@@ -907,7 +908,10 @@ void BitcoinGUI::message(const QString &title, const QString &message, unsigned 
             *ret = r == QMessageBox::Ok;
     }
     else
+    {
+        //qDebug() << message.toStdString().c_str();
         notificator->notify((Notificator::Class)nNotifyIcon, strTitle, message);
+    }
 }
 
 void BitcoinGUI::changeEvent(QEvent *e)
@@ -960,6 +964,7 @@ void BitcoinGUI::showEvent(QShowEvent *event)
     optionsAction->setEnabled(true);
 }
 
+
 #ifdef ENABLE_WALLET
 void BitcoinGUI::incomingTransaction(const QString& date, int unit, const CAmount& amount, const QString& type, const QString& address, const QString& label)
 {
@@ -971,6 +976,9 @@ void BitcoinGUI::incomingTransaction(const QString& date, int unit, const CAmoun
         msg += tr("Label: %1\n").arg(label);
     else if (!address.isEmpty())
         msg += tr("Address: %1\n").arg(address);
+
+    //qDebug() << msg.toStdString().c_str();
+
     message((amount)<0 ? tr("Sent transaction") : tr("Incoming transaction"),
              msg, CClientUIInterface::MSG_INFORMATION);
 }

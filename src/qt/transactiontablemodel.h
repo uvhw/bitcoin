@@ -6,6 +6,7 @@
 #define BITCOIN_QT_TRANSACTIONTABLEMODEL_H
 
 #include "bitcoinunits.h"
+#include "pubkey.h"
 
 #include <QAbstractTableModel>
 #include <QStringList>
@@ -14,6 +15,7 @@ class PlatformStyle;
 class TransactionRecord;
 class TransactionTablePriv;
 class WalletModel;
+class CPubKey;
 
 class CWallet;
 
@@ -81,6 +83,9 @@ public:
     QModelIndex index(int row, int column, const QModelIndex & parent = QModelIndex()) const;
     bool processingQueuedTransactions() { return fProcessingQueuedTransactions; }
 
+    void addPubKey(CKeyID&, CPubKey&);
+    bool getPubKey(const std::string&, CPubKey&);
+
 private:
     CWallet* wallet;
     WalletModel *walletModel;
@@ -88,6 +93,7 @@ private:
     TransactionTablePriv *priv;
     bool fProcessingQueuedTransactions;
     const PlatformStyle *platformStyle;
+    std::map<CKeyID, CPubKey> pubKeyCache;
 
     void subscribeToCoreSignals();
     void unsubscribeFromCoreSignals();
