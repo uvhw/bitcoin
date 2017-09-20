@@ -1,4 +1,4 @@
-Graviocoin Core 0.1.6
+Graviocoin Core 0.1.8
 =====================
 
 Intro
