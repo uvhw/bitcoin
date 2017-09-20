@@ -93,12 +93,14 @@ public:
             hash(), time(0), type(Other), from(""), to(""), encrypted(false), plainText(false), idx(0), model(walletModel)
     {
         haveFromPubKey = false;
+        keyExchange = true;
     }
 
     MessageRecord(uint256 hash, qint64 time, WalletModel *walletModel):
             hash(hash), time(time), type(Other), from(""), to(""), encrypted(false), plainText(false), idx(0), model(walletModel)
     {
         haveFromPubKey = false;
+        keyExchange = true;
     }
 
     /** Decompose CWallet Message to model Message records.
@@ -120,6 +122,7 @@ public:
     int idx; /** SubMessage index, for sort key */
     CPubKey fromPubKey;
     bool haveFromPubKey;
+    bool keyExchange;
     WalletModel *model;
     /**@}*/
 

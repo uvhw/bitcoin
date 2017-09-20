@@ -94,6 +94,8 @@ bool MessageRecord::unpackBlob(const CBlob& blob)
                 fromPubKey.Set(lPubKeyRaw.begin(), lPubKeyRaw.end());
                 haveFromPubKey = fromPubKey.IsValid();
 
+                keyExchange = haveFromPubKey && !encrypted;
+
             }
             return true;
         }
@@ -408,6 +410,12 @@ void MessageRecord::SerializeMessage(UniValue& blob)
     }
     else
     {
+        lInstance.push_back(Pair("subj", subj.toStdString()));
+        lInstance.push_back(Pair("message", message.toStdString()));
+    }
+
+    if (keyExchange)
+    {
         // own private and public key
         CBitcoinAddress lFromAddress(from);
         CKeyID lFromID; lFromAddress.GetKeyID(lFromID);
@@ -416,8 +424,6 @@ void MessageRecord::SerializeMessage(UniValue& blob)
 
         std::string lPubKey = EncodeBase64(lFromPubKey.begin(), lFromPubKey.size());
         lInstance.push_back(Pair("pubkey", lPubKey));
-        lInstance.push_back(Pair("subj", subj.toStdString()));
-        lInstance.push_back(Pair("message", message.toStdString()));
     }
 
     blob.push_back(Pair("instance", lInstance));
