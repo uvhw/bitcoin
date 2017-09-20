@@ -656,7 +656,7 @@ bool MessageEdit::trySendMessage()
     lRecipient.address = QString(rec->to.c_str());
 
     lRecipient.calcAndAddFee = true;
-    lRecipient.amount = DEFAULT_MIN_RELAY_TX_FEE;
+    lRecipient.amount = DEFAULT_MIN_RELAY_TX_FEE * 4;
 
     std::string lRawBlob = lBlob.write();
     //qDebug() << "lRawBlob = " << lRawBlob.c_str();
