@@ -63,10 +63,6 @@ MessageEdit::MessageEdit(const PlatformStyle *platformStyle, WalletModel *wallet
     this->action = action;
     this->platformStyle = const_cast<PlatformStyle *>(platformStyle);
 
-#ifdef Q_OS_OSX
-    setUnifiedTitleAndToolBarOnMac(true);
-#endif
-
     QVBoxLayout *vlayout = new QVBoxLayout(this);
     vlayout->setContentsMargins(0,0,0,0);
 
