@@ -568,13 +568,16 @@ public:
     unsigned int nDataPos;
 
     int64_t nTime;                  // time (in microseconds) of message receipt.
+    
+    bool include_checksum;
 
-    CNetMessage(const CMessageHeader::MessageStartChars& pchMessageStartIn, int nTypeIn, int nVersionIn) : hdrbuf(nTypeIn, nVersionIn), hdr(pchMessageStartIn), vRecv(nTypeIn, nVersionIn) {
+    CNetMessage(const CMessageHeader::MessageStartChars& pchMessageStartIn, int nTypeIn, int nVersionIn, bool include_checksum = true) : hdrbuf(nTypeIn, nVersionIn), hdr(pchMessageStartIn), vRecv(nTypeIn, nVersionIn) {
         hdrbuf.resize(24);
         in_data = false;
         nHdrPos = 0;
         nDataPos = 0;
         nTime = 0;
+        this->include_checksum = include_checksum;
     }
 
     bool complete() const

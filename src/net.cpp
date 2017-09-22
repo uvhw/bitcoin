@@ -732,7 +732,7 @@ bool CNode::ReceiveMsgBytes(const char *pch, unsigned int nBytes, bool& complete
         // get current incomplete message, or create a new one
         if (vRecvMsg.empty() ||
             vRecvMsg.back().complete())
-            vRecvMsg.push_back(CNetMessage(Params().MessageStart(), SER_NETWORK, INIT_PROTO_VERSION));
+            vRecvMsg.push_back(CNetMessage(Params().MessageStart(), SER_NETWORK, INIT_PROTO_VERSION, nVersion >= 209 || nVersion == 0));
 
         CNetMessage& msg = vRecvMsg.back();
 
@@ -743,8 +743,9 @@ bool CNode::ReceiveMsgBytes(const char *pch, unsigned int nBytes, bool& complete
         else
             handled = msg.readData(pch, nBytes);
 
-        if (handled < 0)
+        if (handled < 0) {
             return false;
+        }
 
         if (msg.in_data && msg.hdr.nMessageSize > MAX_PROTOCOL_MESSAGE_LENGTH) {
             LogPrint(BCLog::NET, "Oversized message from peer=%i, disconnecting\n", GetId());
@@ -802,27 +803,37 @@ int CNode::GetSendVersion() const
 int CNetMessage::readHeader(const char *pch, unsigned int nBytes)
 {
     // copy data to temporary parsing buffer
-    unsigned int nRemaining = 24 - nHdrPos;
+    unsigned int nRemaining = (include_checksum ? 24 : 20) - nHdrPos;
     unsigned int nCopy = std::min(nRemaining, nBytes);
 
     memcpy(&hdrbuf[nHdrPos], pch, nCopy);
     nHdrPos += nCopy;
 
     // if header incomplete, exit
-    if (nHdrPos < 24)
+    if (nHdrPos < 20)
         return nCopy;
 
     // deserialize to CMessageHeader
     try {
         hdrbuf >> hdr;
+        if (std::strcmp(hdr.pchCommand, "version") == 0 && hdr.pchChecksum[0] == 0x65 && 
+           hdr.pchChecksum[1] == 0x00 && hdr.pchChecksum[2] == 0x00 && hdr.pchChecksum[3] == 0x00) {
+            nCopy -= 4;
+            hdr.pchChecksum[0] = 0x00;
+            hdr.pchChecksum[1] = 0x00;
+            hdr.pchChecksum[2] = 0x00;
+            hdr.pchChecksum[3] = 0x00;
+            hdr.include_checksum = false;
+        }
     }
     catch (const std::exception&) {
         return -1;
     }
 
     // reject messages larger than MAX_SIZE
-    if (hdr.nMessageSize > MAX_SIZE)
+    if (hdr.nMessageSize > MAX_SIZE) {
         return -1;
+    }
 
     // switch state to reading message data
     in_data = true;
@@ -1336,8 +1347,9 @@ void CConnman::ThreadSocketHandler()
                 if (nBytes > 0)
                 {
                     bool notify = false;
-                    if (!pnode->ReceiveMsgBytes(pchBuf, nBytes, notify))
+                    if (!pnode->ReceiveMsgBytes(pchBuf, nBytes, notify)) {
                         pnode->CloseSocketDisconnect();
+                    }
                     RecordBytesRecv(nBytes);
                     if (notify) {
                         size_t nSizeAdded = 0;
@@ -2443,8 +2455,9 @@ void CConnman::Stop()
     }
 
     // Close sockets
-    for (CNode* pnode : vNodes)
+    for (CNode* pnode : vNodes) {
         pnode->CloseSocketDisconnect();
+    }
     for (ListenSocket& hListenSocket : vhListenSocket)
         if (hListenSocket.socket != INVALID_SOCKET)
             if (!CloseSocket(hListenSocket.socket))
@@ -2821,16 +2834,26 @@ bool CConnman::NodeFullyConnected(const CNode* pnode)
 void CConnman::PushMessage(CNode* pnode, CSerializedNetMsg&& msg)
 {
     size_t nMessageSize = msg.data.size();
-    size_t nTotalSize = nMessageSize + CMessageHeader::HEADER_SIZE;
+    size_t nTotalSize = nMessageSize;
     LogPrint(BCLog::NET, "sending %s (%d bytes) peer=%d\n",  SanitizeString(msg.command.c_str()), nMessageSize, pnode->GetId());
 
     std::vector<unsigned char> serializedHeader;
-    serializedHeader.reserve(CMessageHeader::HEADER_SIZE);
+    if (pnode->nVersion < 209 && pnode->nVersion > 0) {
+        nTotalSize += (CMessageHeader::HEADER_SIZE - CMessageHeader::CHECKSUM_SIZE);
+        serializedHeader.reserve(CMessageHeader::HEADER_SIZE - CMessageHeader::CHECKSUM_SIZE);
+    } else {
+        nTotalSize += CMessageHeader::HEADER_SIZE;
+        serializedHeader.reserve(CMessageHeader::HEADER_SIZE);
+    }
     uint256 hash = Hash(msg.data.data(), msg.data.data() + nMessageSize);
-    CMessageHeader hdr(Params().MessageStart(), msg.command.c_str(), nMessageSize);
-    memcpy(hdr.pchChecksum, hash.begin(), CMessageHeader::CHECKSUM_SIZE);
-
-    CVectorWriter{SER_NETWORK, INIT_PROTO_VERSION, serializedHeader, 0, hdr};
+    if (pnode->nVersion >= 209 || pnode->nVersion == 0) {
+        CMessageHeader hdr(Params().MessageStart(), msg.command.c_str(), nMessageSize);
+        memcpy(hdr.pchChecksum, hash.begin(), CMessageHeader::CHECKSUM_SIZE);
+        CVectorWriter{SER_NETWORK, INIT_PROTO_VERSION, serializedHeader, 0, hdr};
+    } else {
+        CMessageHeader hdr(Params().MessageStart(), msg.command.c_str(), nMessageSize, false);
+        CVectorWriter{SER_NETWORK, INIT_PROTO_VERSION, serializedHeader, 0, hdr};
+    }
 
     size_t nBytesSent = 0;
     {

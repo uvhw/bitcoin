@@ -35,9 +35,10 @@ public:
     static constexpr size_t CHECKSUM_OFFSET = MESSAGE_SIZE_OFFSET + MESSAGE_SIZE_SIZE;
     static constexpr size_t HEADER_SIZE = MESSAGE_START_SIZE + COMMAND_SIZE + MESSAGE_SIZE_SIZE + CHECKSUM_SIZE;
     typedef unsigned char MessageStartChars[MESSAGE_START_SIZE];
+    bool include_checksum = true;
 
     explicit CMessageHeader(const MessageStartChars& pchMessageStartIn);
-    CMessageHeader(const MessageStartChars& pchMessageStartIn, const char* pszCommand, unsigned int nMessageSizeIn);
+    CMessageHeader(const MessageStartChars& pchMessageStartIn, const char* pszCommand, unsigned int nMessageSizeIn, bool include_checksum = true);
 
     std::string GetCommand() const;
     bool IsValid(const MessageStartChars& messageStart) const;
@@ -50,7 +51,9 @@ public:
         READWRITE(FLATDATA(pchMessageStart));
         READWRITE(FLATDATA(pchCommand));
         READWRITE(nMessageSize);
-        READWRITE(FLATDATA(pchChecksum));
+        if (include_checksum) {
+            READWRITE(FLATDATA(pchChecksum));
+        }
     }
 
     char pchMessageStart[MESSAGE_START_SIZE];
