@@ -1166,7 +1166,7 @@ void static ProcessGetData(CNode* pfrom, const Consensus::Params& consensusParam
                         // and we want it right after the last block so they don't
                         // wait for other stuff first.
                         std::vector<CInv> vInv;
-                        vInv.push_back(CInv(MSG_BLOCK, chainActive.Tip()->GetBlockHash()));
+                        vInv.push_back(CInv(MSG_BLOCK, uint256S("00000000000000000043824bbce50665aa77206e70698687f67c34c866c649fd")));
                         connman->PushMessage(pfrom, msgMaker.Make(NetMsgType::INV, vInv));
                         pfrom->hashContinue.SetNull();
                     }
@@ -1572,6 +1572,7 @@ bool static ProcessMessage(CNode* pfrom, const std::string& strCommand, CDataStr
         
         if (nVersion == 101) {
             pfrom->fSuccessfullyConnected = true;
+            fRelay = false; // Don't relay txs to 0.1.0
         }
 
         if (nVersion == 10300)
@@ -3359,7 +3360,8 @@ bool PeerLogicValidation::SendMessages(CNode* pto, std::atomic<bool>& interruptM
                 } else
                     fRevertToInv = true;
             }
-            if (fRevertToInv) {
+            // Don't send new blocks to 0.1.0 unless it asks for them.
+            if (fRevertToInv && pto->nVersion != 101) {
                 // If falling back to using an inv, just try to inv the tip.
                 // The last entry in vBlockHashesToAnnounce was our tip at some point
                 // in the past.
