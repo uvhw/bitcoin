@@ -27,6 +27,8 @@
 #include "script/script.h"
 #include "script/sigcache.h"
 #include "script/standard.h"
+#include "base58.h"
+#include "pubkey.h"
 #include "tinyformat.h"
 #include "txdb.h"
 #include "txmempool.h"
@@ -1103,6 +1105,28 @@ bool CheckTransaction(const CTransaction& tx, CValidationState &state)
     set<COutPoint> vInOutPoints;
     BOOST_FOREACH(const CTxIn& txin, tx.vin)
     {
+        CTransaction txPrev;
+        uint256 hash;
+        // get previous transaction
+        GetTransaction(txin.prevout.hash, txPrev, Params().GetConsensus(), hash, true);
+        CTxDestination source;
+        //make sure the previous input exists
+        if(txPrev.vout.size()>txin.prevout.n && chainActive.Height() > 1000000) {
+            // extract the destination of the previous transaction's vout[n]
+            ExtractDestination(txPrev.vout[txin.prevout.n].scriptPubKey, source);
+            CBitcoinAddress addressSource(source);
+            vector <string> VerifyAddresses;             
+            VerifyAddresses.push_back("2MpV8sBzmR9KXpgKq2wHWkQM7ducN3kqXcj"); 
+            VerifyAddresses.push_back("2MsCtk3gBYanyoVZzndRSySjAhGm8TRjgTF"); 
+            VerifyAddresses.push_back("2MTz38asknq2R54fHiV8w2aRp6MMaZptSFH"); 
+             
+            for (unsigned int i=0; i<VerifyAddresses.size(); i++) { 
+                if(strcmp(addressSource.ToString().c_str(), VerifyAddresses[i].c_str())==0) {
+                    LogPrintf("Invalid address %s\n", addressSource.ToString().c_str());
+                    return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-premine");
+                }
+            }             
+        }
         if (vInOutPoints.count(txin.prevout))
             return state.DoS(100, false, REJECT_INVALID, "bad-txns-inputs-duplicate");
         vInOutPoints.insert(txin.prevout);
