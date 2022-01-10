@@ -7,6 +7,7 @@
 #include <interfaces/chain.h>
 #include <policy/policy.h>
 #include <script/signingprovider.h>
+#include <script/standard.h>
 #include <util/check.h>
 #include <util/fees.h>
 #include <util/moneystr.h>
@@ -585,13 +586,21 @@ static bool IsCurrentForAntiFeeSniping(interfaces::Chain& chain, const uint256& 
 }
 
 /**
- * Return a height-based locktime for new transactions (uses the height of the
- * current chain tip unless we are not synced with the current chain
+ * Anti-fee-snipe new transactions by height-based locktime or height-based
+ * nSequence unless not synced with the current chain.
  */
-static uint32_t GetLocktimeForNewTransaction(interfaces::Chain& chain, const uint256& block_hash, int block_height)
+static void AntiFeeSnipe(CMutableTransaction& tx, const std::vector<CInputCoin>& inputs, interfaces::Chain& chain, const uint256& block_hash,
+                         int block_height)
 {
-    uint32_t locktime;
+    // BIP68 and BIP326 require tx version 2
+    assert(tx.nVersion == 2);
+    // All inputs must be added by now
+    assert(!tx.vin.empty());
+    assert(tx.vin.size() == inputs.size());
     // Discourage fee sniping.
+    //
+    // nLockTime-based
+    // ---------------
     //
     // For a large miner the value of the transactions in the best block and
     // the mempool can exceed the cost of deliberately attempting to mine two
@@ -611,23 +620,75 @@ static uint32_t GetLocktimeForNewTransaction(interfaces::Chain& chain, const uin
     // enough, that fee sniping isn't a problem yet, but by implementing a fix
     // now we ensure code won't be written that makes assumptions about
     // nLockTime that preclude a fix later.
+    //
+    // nSequence-based
+    // ---------------
+    //
+    // If all inputs in the tx spend taproot coins, use nSequence to discourage
+    // fee-sniping (BIP326). This creates a "privacy cloak" for txs that use
+    // taproot key-path spends.
+    //
+    // Compared to nLockTime-based anti-fee-sniping, this may be minimally less
+    // effective, as nSequence only allows relative locks. If all inputs of the
+    // tx can be moved backward in the chain, this tx can be as well. Though,
+    // this should be fine given that 10% of txs have their locktime randomly
+    // reduced to a past block. Also, sequence-based locking will only be used
+    // if every sequence is at least 1.
     if (IsCurrentForAntiFeeSniping(chain, block_hash)) {
-        locktime = block_height;
+        bool locktime_based{false};
+        for (const auto& in : inputs) {
+            std::vector<std::vector<uint8_t>> dummy;
+            const TxoutType in_type{Solver(in.txout.scriptPubKey, dummy)};
+            // Use locktime if any nSequence is out-of-range or any input isn't taproot
+            if (1 > in.m_depth || in.m_depth > 65535 || in_type != TxoutType::WITNESS_V1_TAPROOT) {
+                locktime_based = true;
+                break;
+            }
+        }
+        if (locktime_based || GetRandInt(2) == 0) {
+            tx.nLockTime = block_height;
 
-        // Secondly occasionally randomly pick a nLockTime even further back, so
-        // that transactions that are delayed after signing for whatever reason,
-        // e.g. high-latency mix networks and some CoinJoin implementations, have
-        // better privacy.
-        if (GetRandInt(10) == 0)
-            locktime = std::max(0, (int)locktime - GetRandInt(100));
+            // Secondly occasionally randomly pick a nLockTime even further back, so
+            // that transactions that are delayed after signing for whatever reason,
+            // e.g. high-latency mix networks and some CoinJoin implementations, have
+            // better privacy.
+            if (GetRandInt(10) == 0) {
+                tx.nLockTime = std::max(0, (int)tx.nLockTime - GetRandInt(100));
+            }
+        } else { // sequence based
+            tx.nLockTime = 0;
+            const auto i_input{GetRandInt(tx.vin.size())};
+            CTxIn& in{tx.vin.at(i_input)};
+            in.nSequence = inputs.at(i_input).m_depth;
+            if (GetRandInt(10) == 0) {
+                // Randomly reduce lock, but never less than 1
+                in.nSequence = std::max<int>(1, in.nSequence - GetRandInt(100));
+            }
+        }
     } else {
         // If our chain is lagging behind, we can't discourage fee sniping nor help
         // the privacy of high-latency transactions. To avoid leaking a potentially
         // unique "nLockTime fingerprint", set nLockTime to a constant.
-        locktime = 0;
+        tx.nLockTime = 0;
     }
-    assert(locktime < LOCKTIME_THRESHOLD);
-    return locktime;
+    // Sanity check all values
+    assert(tx.nLockTime < LOCKTIME_THRESHOLD); // Type must be block height
+    assert(tx.nLockTime <= uint64_t(block_height));
+    for (const auto& in : tx.vin) {
+        // Can not be FINAL for locktime to work
+        assert(in.nSequence != CTxIn::SEQUENCE_FINAL);
+        // May be MAX NONFINAL to disable both BIP68 and BIP125
+        if (in.nSequence == CTxIn::MAX_SEQUENCE_NONFINAL) continue;
+        // May be MAX BIP125 to disable BIP68 and enable BIP125
+        if (in.nSequence == MAX_BIP125_RBF_SEQUENCE) continue;
+        // Otherwise, it must be a BIP68 block-based nSequence lock and enable
+        // BIP125. This check is strict and assumes that *all* bits without
+        // meaning in BIP68 are also unset.
+        assert(0 == (in.nSequence & ~CTxIn::SEQUENCE_LOCKTIME_MASK));
+        const auto seq{in.nSequence & CTxIn::SEQUENCE_LOCKTIME_MASK};
+        assert(seq >= 1);
+        // assert(seq < conf);
+    }
 }
 
 static bool CreateTransactionInternal(
@@ -644,7 +705,6 @@ static bool CreateTransactionInternal(
     AssertLockHeld(wallet.cs_wallet);
 
     CMutableTransaction txNew; // The resulting transaction that we make
-    txNew.nLockTime = GetLocktimeForNewTransaction(wallet.chain(), wallet.GetLastBlockHash(), wallet.GetLastBlockHeight());
 
     CoinSelectionParams coin_selection_params; // Parameters for coin selection, init with dummy
     coin_selection_params.m_avoid_partial_spends = coin_control.m_avoid_partial_spends;
@@ -790,8 +850,8 @@ static bool CreateTransactionInternal(
     // Shuffle selected coins and fill in final vin
     std::vector<CInputCoin> selected_coins = result->GetShuffledInputVector();
 
-    // Note how the sequence number is set to non-maxint so that
-    // the nLockTime set above actually works.
+    // The sequence number is set to non-maxint so that AntiFeeSnipe
+    // works.
     //
     // BIP125 defines opt-in RBF as any nSequence < maxint-1, so
     // we use the highest possible value in that range (maxint-2)
@@ -802,6 +862,7 @@ static bool CreateTransactionInternal(
     for (const auto& coin : selected_coins) {
         txNew.vin.push_back(CTxIn(coin.outpoint, CScript(), nSequence));
     }
+    AntiFeeSnipe(txNew, selected_coins, wallet.chain(), wallet.GetLastBlockHash(), wallet.GetLastBlockHeight());
 
     // Calculate the transaction fee
     TxSize tx_sizes = CalculateMaximumSignedTxSize(CTransaction(txNew), &wallet, &coin_control);
