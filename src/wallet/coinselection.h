@@ -21,7 +21,7 @@ static const CAmount MIN_FINAL_CHANGE = MIN_CHANGE/2;
 /** A UTXO under consideration for use in funding a new transaction. */
 class CInputCoin {
 public:
-    CInputCoin(const CTransactionRef& tx, unsigned int i, int input_bytes = -1)
+    CInputCoin(const CTransactionRef& tx, unsigned int i, int input_bytes = -1, int depth = -1)
     {
         if (!tx)
             throw std::invalid_argument("tx should not be null");
@@ -32,6 +32,7 @@ public:
         txout = tx->vout[i];
         effective_value = txout.nValue;
         m_input_bytes = input_bytes;
+        m_depth = depth;
     }
 
     CInputCoin(const COutPoint& outpoint_in, const CTxOut& txout_in)
@@ -54,6 +55,7 @@ public:
 
     /** Pre-computed estimated size of this output as a fully-signed input in a transaction. Can be -1 if it could not be calculated */
     int m_input_bytes{-1};
+    int m_depth{-1};
 
     bool operator<(const CInputCoin& rhs) const {
         return outpoint < rhs.outpoint;
