@@ -27,13 +27,13 @@
 #define COPYRIGHT_HOLDERS "The %s developers"
 
 /* Copyright holder(s) */
-#define COPYRIGHT_HOLDERS_FINAL "The Bitcoin Core developers"
+#define COPYRIGHT_HOLDERS_FINAL "The Bitcoin developers"
 
 /* Replacement for %s in copyright holders string */
-#define COPYRIGHT_HOLDERS_SUBSTITUTION "Bitcoin Core"
+#define COPYRIGHT_HOLDERS_SUBSTITUTION "Bitcoin"
 
 /* Copyright year */
-#define COPYRIGHT_YEAR 2019
+#define COPYRIGHT_YEAR 2009-2022
 
 /* Define to 1 to enable wallet functions */
 #define ENABLE_WALLET 1
