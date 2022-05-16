@@ -1,21 +1,21 @@
-// Copyright (c) 2012-2016 The Bitcoin Core developers
+// Copyright (c) 2012-2021 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "bloom.h"
+#include <common/bloom.h>
 
-#include "base58.h"
-#include "clientversion.h"
-#include "key.h"
-#include "merkleblock.h"
-#include "primitives/block.h"
-#include "random.h"
-#include "serialize.h"
-#include "streams.h"
-#include "uint256.h"
-#include "util.h"
-#include "utilstrencodings.h"
-#include "test/test_bitcoin.h"
+#include <clientversion.h>
+#include <key.h>
+#include <key_io.h>
+#include <merkleblock.h>
+#include <primitives/block.h>
+#include <random.h>
+#include <serialize.h>
+#include <streams.h>
+#include <test/util/setup_common.h>
+#include <uint256.h>
+#include <util/strencodings.h>
+#include <util/system.h>
 
 #include <vector>
 
@@ -27,6 +27,7 @@ BOOST_AUTO_TEST_CASE(bloom_create_insert_serialize)
 {
     CBloomFilter filter(3, 0.01, 0, BLOOM_UPDATE_ALL);
 
+    BOOST_CHECK_MESSAGE( !filter.contains(ParseHex("99108ad8ed9bb6274d3980bab5a85c048f0950c8")), "Bloom filter should be empty!");
     filter.insert(ParseHex("99108ad8ed9bb6274d3980bab5a85c048f0950c8"));
     BOOST_CHECK_MESSAGE( filter.contains(ParseHex("99108ad8ed9bb6274d3980bab5a85c048f0950c8")), "Bloom filter doesn't contain just-inserted object!");
     // One bit different in first byte
@@ -41,17 +42,12 @@ BOOST_AUTO_TEST_CASE(bloom_create_insert_serialize)
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << filter;
 
-    std::vector<unsigned char> vch = ParseHex("03614e9b050000000000000001");
-    std::vector<char> expected(vch.size());
+    std::vector<uint8_t> expected = ParseHex("03614e9b050000000000000001");
+    auto result{MakeUCharSpan(stream)};
 
-    for (unsigned int i = 0; i < vch.size(); i++)
-        expected[i] = (char)vch[i];
-
-    BOOST_CHECK_EQUAL_COLLECTIONS(stream.begin(), stream.end(), expected.begin(), expected.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), expected.begin(), expected.end());
 
     BOOST_CHECK_MESSAGE( filter.contains(ParseHex("99108ad8ed9bb6274d3980bab5a85c048f0950c8")), "Bloom filter doesn't contain just-inserted object!");
-    filter.clear();
-    BOOST_CHECK_MESSAGE( !filter.contains(ParseHex("99108ad8ed9bb6274d3980bab5a85c048f0950c8")), "Bloom filter should be empty!");
 }
 
 BOOST_AUTO_TEST_CASE(bloom_create_insert_serialize_with_tweak)
@@ -73,40 +69,31 @@ BOOST_AUTO_TEST_CASE(bloom_create_insert_serialize_with_tweak)
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << filter;
 
-    std::vector<unsigned char> vch = ParseHex("03ce4299050000000100008001");
-    std::vector<char> expected(vch.size());
+    std::vector<uint8_t> expected = ParseHex("03ce4299050000000100008001");
+    auto result{MakeUCharSpan(stream)};
 
-    for (unsigned int i = 0; i < vch.size(); i++)
-        expected[i] = (char)vch[i];
-
-    BOOST_CHECK_EQUAL_COLLECTIONS(stream.begin(), stream.end(), expected.begin(), expected.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), expected.begin(), expected.end());
 }
 
 BOOST_AUTO_TEST_CASE(bloom_create_insert_key)
 {
     std::string strSecret = std::string("5Kg1gnAjaLfKiwhhPpGS3QfRg2m6awQvaj98JCZBZQ5SuS2F15C");
-    CBitcoinSecret vchSecret;
-    BOOST_CHECK(vchSecret.SetString(strSecret));
-
-    CKey key = vchSecret.GetKey();
+    CKey key = DecodeSecret(strSecret);
     CPubKey pubkey = key.GetPubKey();
     std::vector<unsigned char> vchPubKey(pubkey.begin(), pubkey.end());
 
     CBloomFilter filter(2, 0.001, 0, BLOOM_UPDATE_ALL);
     filter.insert(vchPubKey);
     uint160 hash = pubkey.GetID();
-    filter.insert(std::vector<unsigned char>(hash.begin(), hash.end()));
+    filter.insert(hash);
 
     CDataStream stream(SER_NETWORK, PROTOCOL_VERSION);
     stream << filter;
 
-    std::vector<unsigned char> vch = ParseHex("038fc16b080000000000000001");
-    std::vector<char> expected(vch.size());
+    std::vector<unsigned char> expected = ParseHex("038fc16b080000000000000001");
+    auto result{MakeUCharSpan(stream)};
 
-    for (unsigned int i = 0; i < vch.size(); i++)
-        expected[i] = (char)vch[i];
-
-    BOOST_CHECK_EQUAL_COLLECTIONS(stream.begin(), stream.end(), expected.begin(), expected.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(result.begin(), result.end(), expected.begin(), expected.end());
 }
 
 BOOST_AUTO_TEST_CASE(bloom_match)
@@ -188,7 +175,7 @@ BOOST_AUTO_TEST_CASE(merkle_block_1)
     CMerkleBlock merkleBlock(block, filter);
     BOOST_CHECK_EQUAL(merkleBlock.header.GetHash().GetHex(), block.GetHash().GetHex());
 
-    BOOST_CHECK_EQUAL(merkleBlock.vMatchedTxn.size(), 1);
+    BOOST_CHECK_EQUAL(merkleBlock.vMatchedTxn.size(), 1U);
     std::pair<unsigned int, uint256> pair = merkleBlock.vMatchedTxn[0];
 
     BOOST_CHECK(merkleBlock.vMatchedTxn[0].second == uint256S("0x74d681e0e03bafa802c8aa084379aa98d9fcd632ddc2ed9782b586ec87451f20"));
@@ -356,13 +343,10 @@ BOOST_AUTO_TEST_CASE(merkle_block_3_and_serialize)
     CDataStream merkleStream(SER_NETWORK, PROTOCOL_VERSION);
     merkleStream << merkleBlock;
 
-    std::vector<unsigned char> vch = ParseHex("0100000079cda856b143d9db2c1caff01d1aecc8630d30625d10e8b4b8b0000000000000b50cc069d6a3e33e3ff84a5c41d9d3febe7c770fdcc96b2c3ff60abe184f196367291b4d4c86041b8fa45d630100000001b50cc069d6a3e33e3ff84a5c41d9d3febe7c770fdcc96b2c3ff60abe184f19630101");
-    std::vector<char> expected(vch.size());
+    std::vector<uint8_t> expected = ParseHex("0100000079cda856b143d9db2c1caff01d1aecc8630d30625d10e8b4b8b0000000000000b50cc069d6a3e33e3ff84a5c41d9d3febe7c770fdcc96b2c3ff60abe184f196367291b4d4c86041b8fa45d630100000001b50cc069d6a3e33e3ff84a5c41d9d3febe7c770fdcc96b2c3ff60abe184f19630101");
+    auto result{MakeUCharSpan(merkleStream)};
 
-    for (unsigned int i = 0; i < vch.size(); i++)
-        expected[i] = (char)vch[i];
-
-    BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), merkleStream.begin(), merkleStream.end());
+    BOOST_CHECK_EQUAL_COLLECTIONS(expected.begin(), expected.end(), result.begin(), result.end());
 }
 
 BOOST_AUTO_TEST_CASE(merkle_block_4)
@@ -464,6 +448,9 @@ static std::vector<unsigned char> RandomData()
 
 BOOST_AUTO_TEST_CASE(rolling_bloom)
 {
+    SeedInsecureRand(SeedRand::ZEROS);
+    g_mock_deterministic_tests = true;
+
     // last-100-entry, 1% false positive:
     CRollingBloomFilter rb1(100, 0.01);
 
@@ -488,12 +475,8 @@ BOOST_AUTO_TEST_CASE(rolling_bloom)
         if (rb1.contains(RandomData()))
             ++nHits;
     }
-    // Run test_bitcoin with --log_level=message to see BOOST_TEST_MESSAGEs:
-    BOOST_TEST_MESSAGE("RollingBloomFilter got " << nHits << " false positives (~100 expected)");
-
-    // Insanely unlikely to get a fp count outside this range:
-    BOOST_CHECK(nHits > 25);
-    BOOST_CHECK(nHits < 175);
+    // Expect about 100 hits
+    BOOST_CHECK_EQUAL(nHits, 75U);
 
     BOOST_CHECK(rb1.contains(data[DATASIZE-1]));
     rb1.reset();
@@ -520,10 +503,8 @@ BOOST_AUTO_TEST_CASE(rolling_bloom)
         if (rb1.contains(data[i]))
             ++nHits;
     }
-    // Expect about 5 false positives, more than 100 means
-    // something is definitely broken.
-    BOOST_TEST_MESSAGE("RollingBloomFilter got " << nHits << " false positives (~5 expected)");
-    BOOST_CHECK(nHits < 100);
+    // Expect about 5 false positives
+    BOOST_CHECK_EQUAL(nHits, 6U);
 
     // last-1000-entry, 0.01% false positive:
     CRollingBloomFilter rb2(1000, 0.001);
@@ -534,6 +515,7 @@ BOOST_AUTO_TEST_CASE(rolling_bloom)
     for (int i = 0; i < DATASIZE; i++) {
         BOOST_CHECK(rb2.contains(data[i]));
     }
+    g_mock_deterministic_tests = false;
 }
 
 BOOST_AUTO_TEST_SUITE_END()

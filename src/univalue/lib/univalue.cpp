@@ -1,16 +1,17 @@
 // Copyright 2014 BitPay Inc.
 // Copyright 2015 Bitcoin Core Developers
 // Distributed under the MIT software license, see the accompanying
-// file COPYING or http://www.opensource.org/licenses/mit-license.php.
+// file COPYING or https://opensource.org/licenses/mit-license.php.
 
-#include <stdint.h>
+#include <univalue.h>
+
 #include <iomanip>
+#include <map>
+#include <memory>
 #include <sstream>
-#include <stdlib.h>
-
-#include "univalue.h"
-
-using namespace std;
+#include <string>
+#include <utility>
+#include <vector>
 
 const UniValue NullUniValue;
 
@@ -37,15 +38,15 @@ bool UniValue::setBool(bool val_)
     return true;
 }
 
-static bool validNumStr(const string& s)
+static bool validNumStr(const std::string& s)
 {
-    string tokenVal;
+    std::string tokenVal;
     unsigned int consumed;
     enum jtokentype tt = getJsonToken(tokenVal, consumed, s.data(), s.data() + s.size());
     return (tt == JTOK_NUMBER);
 }
 
-bool UniValue::setNumStr(const string& val_)
+bool UniValue::setNumStr(const std::string& val_)
 {
     if (!validNumStr(val_))
         return false;
@@ -58,7 +59,7 @@ bool UniValue::setNumStr(const string& val_)
 
 bool UniValue::setInt(uint64_t val_)
 {
-    ostringstream oss;
+    std::ostringstream oss;
 
     oss << val_;
 
@@ -67,7 +68,7 @@ bool UniValue::setInt(uint64_t val_)
 
 bool UniValue::setInt(int64_t val_)
 {
-    ostringstream oss;
+    std::ostringstream oss;
 
     oss << val_;
 
@@ -76,7 +77,7 @@ bool UniValue::setInt(int64_t val_)
 
 bool UniValue::setFloat(double val_)
 {
-    ostringstream oss;
+    std::ostringstream oss;
 
     oss << std::setprecision(16) << val_;
 
@@ -85,7 +86,7 @@ bool UniValue::setFloat(double val_)
     return ret;
 }
 
-bool UniValue::setStr(const string& val_)
+bool UniValue::setStr(const std::string& val_)
 {
     clear();
     typ = VSTR;
@@ -180,17 +181,19 @@ bool UniValue::findKey(const std::string& key, size_t& retIdx) const
 
 bool UniValue::checkObject(const std::map<std::string,UniValue::VType>& t) const
 {
-    if (typ != VOBJ)
+    if (typ != VOBJ) {
         return false;
+    }
 
-    for (std::map<std::string,UniValue::VType>::const_iterator it = t.begin();
-         it != t.end(); ++it) {
+    for (const auto& object: t) {
         size_t idx = 0;
-        if (!findKey(it->first, idx))
+        if (!findKey(object.first, idx)) {
             return false;
+        }
 
-        if (values.at(idx).getType() != it->second)
+        if (values.at(idx).getType() != object.second) {
             return false;
+        }
     }
 
     return true;
@@ -230,7 +233,7 @@ const char *uvTypeName(UniValue::VType t)
     }
 
     // not reached
-    return NULL;
+    return nullptr;
 }
 
 const UniValue& find_value(const UniValue& obj, const std::string& name)

@@ -1,13 +1,16 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
-// Copyright (c) 2009-2016 The Bitcoin Core developers
+// Copyright (c) 2009-2019 The Bitcoin Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-#include "chain.h"
+#include <chain.h>
+#include <util/time.h>
 
-/**
- * CChain implementation
- */
+std::string CBlockFileInfo::ToString() const
+{
+    return strprintf("CBlockFileInfo(blocks=%u, size=%u, heights=%u...%u, time=%s...%s)", nBlocks, nSize, nHeightFirst, nHeightLast, FormatISO8601Date(nTimeFirst), FormatISO8601Date(nTimeLast));
+}
+
 void CChain::SetTip(CBlockIndex *pindex) {
     if (pindex == nullptr) {
         vChain.clear();
@@ -59,10 +62,11 @@ const CBlockIndex *CChain::FindFork(const CBlockIndex *pindex) const {
     return pindex;
 }
 
-CBlockIndex* CChain::FindEarliestAtLeast(int64_t nTime) const
+CBlockIndex* CChain::FindEarliestAtLeast(int64_t nTime, int height) const
 {
-    std::vector<CBlockIndex*>::const_iterator lower = std::lower_bound(vChain.begin(), vChain.end(), nTime,
-        [](CBlockIndex* pBlock, const int64_t& time) -> bool { return pBlock->GetBlockTimeMax() < time; });
+    std::pair<int64_t, int> blockparams = std::make_pair(nTime, height);
+    std::vector<CBlockIndex*>::const_iterator lower = std::lower_bound(vChain.begin(), vChain.end(), blockparams,
+        [](CBlockIndex* pBlock, const std::pair<int64_t, int>& blockparams) -> bool { return pBlock->GetBlockTimeMax() < blockparams.first || pBlock->nHeight < blockparams.second; });
     return (lower == vChain.end() ? nullptr : *lower);
 }
 
@@ -80,12 +84,13 @@ int static inline GetSkipHeight(int height) {
     return (height & 1) ? InvertLowestOne(InvertLowestOne(height - 1)) + 1 : InvertLowestOne(height);
 }
 
-CBlockIndex* CBlockIndex::GetAncestor(int height)
+const CBlockIndex* CBlockIndex::GetAncestor(int height) const
 {
-    if (height > nHeight || height < 0)
+    if (height > nHeight || height < 0) {
         return nullptr;
+    }
 
-    CBlockIndex* pindexWalk = this;
+    const CBlockIndex* pindexWalk = this;
     int heightWalk = nHeight;
     while (heightWalk > height) {
         int heightSkip = GetSkipHeight(heightWalk);
@@ -106,9 +111,9 @@ CBlockIndex* CBlockIndex::GetAncestor(int height)
     return pindexWalk;
 }
 
-const CBlockIndex* CBlockIndex::GetAncestor(int height) const
+CBlockIndex* CBlockIndex::GetAncestor(int height)
 {
-    return const_cast<CBlockIndex*>(this)->GetAncestor(height);
+    return const_cast<CBlockIndex*>(static_cast<const CBlockIndex*>(this)->GetAncestor(height));
 }
 
 void CBlockIndex::BuildSkip()
@@ -146,7 +151,7 @@ int64_t GetBlockProofEquivalentTime(const CBlockIndex& to, const CBlockIndex& fr
     if (r.bits() > 63) {
         return sign * std::numeric_limits<int64_t>::max();
     }
-    return sign * r.GetLow64();
+    return sign * int64_t(r.GetLow64());
 }
 
 /** Find the last common ancestor two blocks have.
